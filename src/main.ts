@@ -12,19 +12,18 @@ import Cube from './geometry/Cube';
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
-  tesselations: 5,
-  color: [255, 0, 0], 
+  Blob: 0.4,
+  Warmth: 1.0, 
   'Load Scene': loadScene, // A function pointer, essentially
 };
 
 let icosphere: Icosphere;
 let square: Square;
 let cube: Cube;
-let prevTesselations: number = 5;
 let uniftime: number;
 
 function loadScene() {
-  icosphere = new Icosphere(vec3.fromValues(0, 0, 0), 1, controls.tesselations);
+  icosphere = new Icosphere(vec3.fromValues(0, 0, 0), 1, 4.0);
   icosphere.create();
   square = new Square(vec3.fromValues(0, 0, 0));
   square.create();
@@ -44,9 +43,9 @@ function main() {
 
   // Add controls to the gui
   const gui = new DAT.GUI();
-  gui.add(controls, 'tesselations', 0, 8).step(1);
+  gui.add(controls, 'Blob', 0, 1).step(0.01);
+  gui.add(controls, 'Warmth', 0, 1).step(0.01);
   gui.add(controls, 'Load Scene');
-  gui.addColor(controls, 'color');
 
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement> document.getElementById('canvas');
@@ -67,7 +66,7 @@ function main() {
   renderer.setClearColor(0.2, 0.2, 0.2, 1);
   gl.enable(gl.DEPTH_TEST);
 
-  const lambert = new ShaderProgram([
+  const noise = new ShaderProgram([
     new Shader(gl.VERTEX_SHADER, require('./shaders/noise-vert.glsl')),
     new Shader(gl.FRAGMENT_SHADER, require('./shaders/noise-frag.glsl')),
   ]);
@@ -79,19 +78,15 @@ function main() {
     gl.viewport(0, 0, window.innerWidth, window.innerHeight);
     renderer.clear();
     uniftime ++;
-    if(controls.tesselations != prevTesselations)
-    {
-      prevTesselations = controls.tesselations;
-      icosphere = new Icosphere(vec3.fromValues(0, 0, 0), 1, prevTesselations);
-      icosphere.create();
-    }
     
-    lambert.setGeometryColor(vec4.fromValues(controls.color[0] / 255, controls.color[1] / 255, controls.color[2] / 255, 1));
-    renderer.render(camera, lambert, [
+    // noise.setGeometryColor(vec4.fromValues(controls.color[0] / 255, controls.color[1] / 255, controls.color[2] / 255, 1));
+    renderer.render(camera, noise, [
       icosphere,
       // square,
       // cube,
-    ], uniftime);
+    ], uniftime,
+    controls.Blob,
+    controls.Warmth);
     stats.end();
 
     // Tell the browser to call `tick` again whenever it renders a new frame

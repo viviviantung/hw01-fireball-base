@@ -30,6 +30,8 @@ class ShaderProgram {
   unifViewProj: WebGLUniformLocation;
   unifColor: WebGLUniformLocation;
   unifTime: WebGLUniformLocation;
+  unifWeight: WebGLUniformLocation;
+  unifWarmth: WebGLUniformLocation;
 
   constructor(shaders: Array<Shader>) {
     this.prog = gl.createProgram();
@@ -50,12 +52,28 @@ class ShaderProgram {
     this.unifViewProj   = gl.getUniformLocation(this.prog, "u_ViewProj");
     this.unifColor      = gl.getUniformLocation(this.prog, "u_Color");
     this.unifTime       = gl.getUniformLocation(this.prog, "u_Time");
+    this.unifWeight     = gl.getUniformLocation(this.prog, "u_NoiseWeight");
+    this.unifWarmth     = gl.getUniformLocation(this.prog, "u_Warmth");
   }
 
   use() {
     if (activeProgram !== this.prog) {
       gl.useProgram(this.prog);
       activeProgram = this.prog;
+    }
+  }
+
+  setWarmth(w: number) {
+    this.use();
+    if (this.unifWarmth !== -1) {
+      gl.uniform1f(this.unifWarmth, w);
+    }
+  }
+
+  setNoiseWeight(w: number) {
+    this.use();
+    if (this.unifWeight !== -1) {
+      gl.uniform1f(this.unifWeight, w);
     }
   }
 

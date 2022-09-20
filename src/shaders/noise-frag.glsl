@@ -3,6 +3,7 @@
 precision highp float;
 
 uniform vec4 u_Color;
+uniform float u_Warmth;
 
 in vec4 fs_Nor;
 in vec4 fs_LightVec;
@@ -57,21 +58,28 @@ float fbm(vec3 x) {
 	return v;
 }
 
-#define Color1 vec4(1.0, 1.0, 1.0, 1.0)
-#define Color2 vec4(1.0, 0.8, 0.2, 1.0)
-#define Color3 vec4(1.0, 0.03, 0.0, 1.0)
-#define Color4 vec4(0.05, 0.02, 0.02, 1.0)
+#define White vec4(1.0, 1.0, 1.0, 1.0)
+#define Yellow vec4(1.0, 0.8, 0.2, 1.0)
+#define Red vec4(1.0, 0.03, 0.0, 1.0)
+#define Black vec4(0.05, 0.02, 0.02, 1.0)
+#define LightBlue vec4(0.5, 0.9, 1.0, 1.0)
+#define DarkBlue vec4(0.0, 0.2, 0.7, 1.0)
 
 vec4 colorize (float n) {
-    float c1 = clamp(n * 5.0 + 0.5, 0.0, 1.0);
-    float c2 = clamp(n * 5.0, 0.0, 1.0);
-    float c3 = clamp(n * 3.4 - 0.5, 0.0, 1.0);
-    vec4 a = mix(Color1, Color2, c1);
-    vec4 b = mix(a, Color3, c2);
-    return mix(b, Color4, c3);
+    vec4 color1 = mix(LightBlue, White, u_Warmth);
+    vec4 color2 = mix(White, Yellow, u_Warmth);
+    vec4 color3 = mix(DarkBlue, Red, u_Warmth);
+
+    float c1 = clamp(n * 4.0 + 0.5, 0.0, 1.0);
+    float c2 = clamp(n * 4.0, 0.0, 1.0);
+    float c3 = clamp(n * 2.4 - 0.5, 0.0, 1.0);
+
+    vec4 a = mix(color1, color2, c1);
+    vec4 b = mix(a, color3, c2);
+    return mix(b, Black, c3);
 }
 
 void main()
 {
-    out_Col = colorize(fs_Noise);
+    out_Col = (colorize(fs_Noise));
 }

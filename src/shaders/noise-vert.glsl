@@ -5,6 +5,7 @@ uniform mat4 u_ModelInvTr;
 uniform mat4 u_ViewProj; 
 
 uniform int u_Time;
+uniform float u_NoiseWeight;
 
 in vec4 vs_Pos;             // The array of vertex positions passed to the shader
 
@@ -20,9 +21,21 @@ out float fs_Noise;
 const vec4 lightPos = vec4(5, 5, 3, 1);
 
 #define NoiseSteps 1
-#define NoiseAmplitude 0.06
+#define NoiseAmplitude 0.1
 #define NoiseFrequency 4.0
 #define Animation vec3(0.0, -3.0, 0.5)
+
+float bias(float b, float t) {
+    return (t / ((((1.0 / b) - 2.0)*(1.0 - t))+ 1.0));
+}
+
+float gain(float g, float t) {
+    if (t < 0.5) {
+        return bias(1.0 - g, 2.0 * t) / 2.0;
+    } else {
+        return 1.0 - bias(1.0 - g, 2.0 - 2.0 * t) / 2.0;
+    }
+}
 
 vec3 mod289(vec3 x) { 
     return x - floor(x * (1.0 / 289.0)) * 289.0; 
@@ -168,13 +181,15 @@ void main()
 
     fs_LightVec = lightPos - modelposition;  // Compute the direction in which the light source lies
 
+    float pulse = gain(0.6, cos(float(u_Time) * 0.01));
+    float init = clamp(sin(modelposition.x * 0.1 + modelposition.y * 0.1 + modelposition.z * 0.1 + (float(u_Time) * 0.01)), -0.5, 1.0) * 2.0;
+    init = init * pulse;
     float displacement = turbulence(modelposition.xyz * NoiseFrequency + Animation * (float(u_Time) * 0.01), 0.1, 1.5, 0.03) * NoiseAmplitude;
     displacement = clamp(abs(displacement), 0.0, 1.0); //+ (fbm(fs_Nor.xyz));
-    float fbmNoise = fbm(fs_Nor.xyz * NoiseFrequency + Animation * (float(u_Time) * 0.01));
-    displacement = mix(displacement, fbmNoise, 0.9);
+    float fbmNoise = fbm(fs_Nor.xyz * 10.0 + Animation * (float(u_Time) * 0.01));
+    displacement = mix(displacement, fbmNoise, u_NoiseWeight);
     fs_Noise = displacement;
-    vec4 newPos = modelposition + fs_Nor * displacement;
-    // gl_Position = u_ViewProj * modelposition * (fbm(modelposition.xyz) * 10.);
+    vec4 newPos = modelposition + fs_Nor * init * displacement;
     gl_Position = u_ViewProj * newPos; // gl_Position is a built-in variable of OpenGL which is
                                              // used to render the final positions of the geometry's vertices
 }
