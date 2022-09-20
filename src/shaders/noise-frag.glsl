@@ -9,6 +9,7 @@ in vec4 fs_Nor;
 in vec4 fs_LightVec;
 in vec4 fs_Col;
 in float fs_Noise;
+in float fs_Time;
 
 out vec4 out_Col;
 
@@ -58,6 +59,15 @@ float fbm(vec3 x) {
 	return v;
 }
 
+float cubicPulse(float c, float w, float x) {
+    x = abs(x - c);
+    if (x > w) {
+        return 0.0;
+    }
+    x /= w;
+    return 1.0 - x * x * (3.0 - 2.0 * x);
+}
+
 #define White vec4(1.0, 1.0, 1.0, 1.0)
 #define Yellow vec4(1.0, 0.8, 0.2, 1.0)
 #define Red vec4(1.0, 0.03, 0.0, 1.0)
@@ -81,5 +91,7 @@ vec4 colorize (float n) {
 
 void main()
 {
-    out_Col = (colorize(fs_Noise));
+    vec4 fireColor = (colorize(fs_Noise));
+    float pulse = clamp((1.0, 0.2, mod(fs_Time * 0.01, 2.0)), 0.9, 1.5);
+    out_Col = fireColor * pulse;
 }
