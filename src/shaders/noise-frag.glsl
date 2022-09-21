@@ -5,59 +5,51 @@ precision highp float;
 uniform vec4 u_Color;
 uniform float u_Warmth;
 uniform float u_Alpha;
+uniform vec2 u_Dimensions;
+uniform sampler2D u_RenderedTexture;
+uniform bool u_Bloom;
 
 in vec4 fs_Nor;
 in vec4 fs_LightVec;
 in vec4 fs_Col;
 in float fs_Noise;
 in float fs_Time;
+in vec2 fs_UV;
 
 out vec4 out_Col;
 
-float noise3D( vec3 p ) {
-    return fract(sin((dot(p, vec3(127.1, 311.7, 191.999)))) * 43758.5453);
-}
+vec3 bloom(vec3 currCol) {
+    vec3 bloomColor;
+    float bright = dot(currCol, vec3(0.2126, 0.7152, 0.0722));
+    if (bright > 0.4) {
+        bloomColor = currCol;
+    } else {
+        bloomColor = vec3(0.0, 0.0, 0.0);
+    }
 
-// Generic 3d noise
-float interpNoise3D(vec3 p){
-    int intX = int(floor(p.x));
-    float fractX = fract(p.x);
-    int intY = int(floor(p.y));
-    float fractY = fract(p.y);
-    int intZ = int(floor(p.z));
-    float fractZ = fract(p.z);
+    vec2 offset = 1.0 / u_Dimensions;
 
-    float v1 = noise3D(vec3(intX, intY, intZ));
-    float v2 = noise3D(vec3(intX + 1, intY, intZ));
-    float v3 = noise3D(vec3(intX, intY + 1, intZ));
-    float v4 = noise3D(vec3(intX + 1, intY + 1, intZ));
-    float v5 = noise3D(vec3(intX, intY, intZ + 1));
-    float v6 = noise3D(vec3(intX + 1, intY, intZ + 1));
-    float v7 = noise3D(vec3(intX, intY + 1, intZ + 1));
-    float v8 = noise3D(vec3(intX + 1, intY + 1, intZ + 1));
+    float gauss[121] = float[121](0.006849,	0.007239,	0.007559,	0.007795,	0.007941,	0.00799,	0.007941,	0.007795,	0.007559,	0.007239,	0.006849,
+                                  0.007239,	0.007653,	0.00799,	0.00824,	0.008394,	0.008446,	0.008394,	0.00824,	0.00799,	0.007653,	0.007239,
+                                  0.007559,	0.00799,	0.008342,	0.008604,	0.008764,	0.008819,	0.008764,	0.008604,	0.008342,	0.00799,	0.007559,
+                                  0.007795,	0.00824,	0.008604,	0.008873,	0.009039,	0.009095,	0.009039,	0.008873,	0.008604,	0.00824,	0.007795,
+                                  0.007941,	0.008394,	0.008764,	0.009039,	0.009208,	0.009265,	0.009208,	0.009039,	0.008764,	0.008394,	0.007941,
+                                  0.00799,	0.008446,	0.008819,	0.009095,	0.009265,	0.009322,	0.009265,	0.009095,	0.008819,	0.008446,	0.00799,
+                                  0.007941,	0.008394,	0.008764,	0.009039,	0.009208,	0.009265,	0.009208,	0.009039,	0.008764,	0.008394,	0.007941,
+                                  0.007795,	0.00824,	0.008604,	0.008873,	0.009039,	0.009095,	0.009039,	0.008873,	0.008604,	0.00824,	0.007795,
+                                  0.007559,	0.00799,	0.008342,	0.008604,	0.008764,	0.008819,	0.008764,	0.008604,	0.008342,	0.00799,    0.007559,
+                                  0.007239,	0.007653,	0.00799,	0.00824,	0.008394,	0.008446,	0.008394,	0.00824,	0.00799,	0.007653,	0.007239,
+                                  0.006849,	0.007239,	0.007559,	0.007795,	0.007941,	0.00799,	0.007941,	0.007795,	0.007559,	0.007239,	0.006849);
+    
+    vec3 result = vec3(0.0, 0.0, 0.0);
 
-    float i1 = mix(v1, v2, fractX);
-    float i2 = mix(v3, v4, fractX);
-    float i3 = mix(v5, v6, fractX);
-    float i4 = mix(v7, v8, fractX);
+    for (int i = 0; i < 11; i ++) {
+        for (int j = 0; j < 11; j++) {
+            result += texture(u_RenderedTexture, fs_UV + vec2(offset.x * float(i - 5), offset.y * float(j - 5))).rgb * gauss[60 + (11 * (j - 5)) + (i - 5)];
+        }
+    }
 
-    float j1 = mix(i1, i2, fractY);
-    float j2 = mix(i3, i4, fractY);
-
-    return mix(j1, j2, fractZ);
-}
-
-// FBM noise
-#define NUM_OCTAVES 8
-float fbm(vec3 x) {
-	float v = 0.0;
-	float a = 0.5;
-	for (int i = 0; i < NUM_OCTAVES; ++i) {
-		v += a * interpNoise3D(x);
-		x = x * 2.0;
-		a *= 0.5;
-	}
-	return v;
+    return result + bloomColor;
 }
 
 float cubicPulse(float c, float w, float x) {
@@ -76,7 +68,7 @@ float cubicPulse(float c, float w, float x) {
 #define LightBlue vec4(0.5, 0.9, 1.0, 1.0)
 #define DarkBlue vec4(0.0, 0.2, 0.7, 1.0)
 
-vec4 colorize (float n) {
+vec4 colorize(float n) {
     vec4 color1 = mix(LightBlue, White, u_Warmth);
     vec4 color2 = mix(White, Yellow, u_Warmth);
     vec4 color3 = mix(DarkBlue, Red, u_Warmth);
@@ -92,7 +84,14 @@ vec4 colorize (float n) {
 
 void main()
 {
-    vec4 fireColor = (colorize(fs_Noise));
+    vec3 fireColor = (colorize(fs_Noise)).xyz;
     float pulse = clamp((1.0, 0.2, mod(fs_Time * 0.01, 2.0)), 0.9, 1.5);
-    out_Col = vec4(fireColor.xyz * pulse, u_Alpha);
+    if (u_Bloom) {
+        vec3 bloomColor = bloom(fireColor.xyz);
+        fireColor += bloomColor;
+        vec3 blend = pow(fireColor, vec3(1.0 / 2.2));
+        out_Col = vec4(blend * pulse, u_Alpha);
+    } else {
+        out_Col = vec4(fireColor * pulse, u_Alpha);
+    }
 }

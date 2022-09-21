@@ -13,11 +13,14 @@ in vec4 vs_Nor;             // The array of vertex normals passed to the shader
 
 in vec4 vs_Col;             // The array of vertex colors passed to the shader.
 
+in vec2 vs_UV;
+
 out vec4 fs_Nor;            // The array of normals that has been transformed by u_ModelInvTr. This is implicitly passed to the fragment shader.
 out vec4 fs_LightVec;       // The direction in which our virtual light lies, relative to each vertex. This is implicitly passed to the fragment shader.
 out vec4 fs_Col; 
 out float fs_Noise;
 out float fs_Time;
+out vec2 fs_UV;
 
 const vec4 lightPos = vec4(5, 5, 3, 1);
 
@@ -189,8 +192,11 @@ void main()
     displacement = clamp(abs(displacement), 0.0, 1.0); //+ (fbm(fs_Nor.xyz));
     float fbmNoise = fbm(fs_Nor.xyz * 10.0 + Animation * (float(u_Time) * 0.01));
     displacement = mix(displacement, fbmNoise, u_NoiseWeight);
+
     fs_Noise = displacement;
     fs_Time = float(u_Time);
+    fs_UV = vs_UV;
+
     vec4 newPos = modelposition + fs_Nor * init * displacement;
     gl_Position = u_ViewProj * newPos; // gl_Position is a built-in variable of OpenGL which is
                                              // used to render the final positions of the geometry's vertices

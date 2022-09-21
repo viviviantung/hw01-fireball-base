@@ -1,4 +1,4 @@
-import {vec4, mat4} from 'gl-matrix';
+import {vec2, vec4, mat4} from 'gl-matrix';
 import Drawable from './Drawable';
 import {gl} from '../../globals';
 
@@ -24,6 +24,7 @@ class ShaderProgram {
   attrPos: number;
   attrNor: number;
   attrCol: number;
+  attrUV: number;
 
   unifModel: WebGLUniformLocation;
   unifModelInvTr: WebGLUniformLocation;
@@ -33,6 +34,9 @@ class ShaderProgram {
   unifWeight: WebGLUniformLocation;
   unifWarmth: WebGLUniformLocation;
   unifAlpha: WebGLUniformLocation;
+  unifDimensions: WebGLUniformLocation;
+  unifSampler2D: WebGLUniformLocation;
+  unifBloom: WebGLUniformLocation;
 
   constructor(shaders: Array<Shader>) {
     this.prog = gl.createProgram();
@@ -48,6 +52,7 @@ class ShaderProgram {
     this.attrPos = gl.getAttribLocation(this.prog, "vs_Pos");
     this.attrNor = gl.getAttribLocation(this.prog, "vs_Nor");
     this.attrCol = gl.getAttribLocation(this.prog, "vs_Col");
+    this.attrUV  = gl.getAttribLocation(this.prog, "vs_UV");
     this.unifModel      = gl.getUniformLocation(this.prog, "u_Model");
     this.unifModelInvTr = gl.getUniformLocation(this.prog, "u_ModelInvTr");
     this.unifViewProj   = gl.getUniformLocation(this.prog, "u_ViewProj");
@@ -56,12 +61,29 @@ class ShaderProgram {
     this.unifWeight     = gl.getUniformLocation(this.prog, "u_NoiseWeight");
     this.unifWarmth     = gl.getUniformLocation(this.prog, "u_Warmth");
     this.unifAlpha      = gl.getUniformLocation(this.prog, "u_Alpha");
+    this.unifDimensions = gl.getUniformLocation(this.prog, "u_Dimensions");
+    this.unifSampler2D  = gl.getUniformLocation(this.prog, "u_RenderedTexture");
+    this.unifBloom  = gl.getUniformLocation(this.prog, "u_Bloom");
   }
 
   use() {
     if (activeProgram !== this.prog) {
       gl.useProgram(this.prog);
       activeProgram = this.prog;
+    }
+  }
+
+  setBloom(b: number) {
+    this.use();
+    if (this.unifBloom !== -1) {
+      gl.uniform1i(this.unifBloom, b);
+    }
+  }
+
+  setDimensions(dims: vec2) {
+    this.use();
+    if (this.unifDimensions !== -1) {
+      gl.uniform2i(this.unifDimensions, dims[0], dims[1]);
     }
   }
 
@@ -124,6 +146,9 @@ class ShaderProgram {
   draw(d: Drawable) {
     this.use();
 
+    // set our "renderedTexture" sampler to texture slot 0
+    gl.uniform1i(this.unifSampler2D, 0);
+
     if (this.attrPos != -1 && d.bindPos()) {
       gl.enableVertexAttribArray(this.attrPos);
       gl.vertexAttribPointer(this.attrPos, 4, gl.FLOAT, false, 0, 0);
@@ -134,11 +159,17 @@ class ShaderProgram {
       gl.vertexAttribPointer(this.attrNor, 4, gl.FLOAT, false, 0, 0);
     }
 
+    if (this.attrUV != -1 && d.bindUV()) {
+      gl.enableVertexAttribArray(this.attrUV);
+      gl.vertexAttribPointer(this.attrUV, 2, gl.FLOAT, false, 0, 0);
+    }
+
     d.bindIdx();
     gl.drawElements(d.drawMode(), d.elemCount(), gl.UNSIGNED_INT, 0);
 
     if (this.attrPos != -1) gl.disableVertexAttribArray(this.attrPos);
     if (this.attrNor != -1) gl.disableVertexAttribArray(this.attrNor);
+    if (this.attrUV != -1) gl.disableVertexAttribArray(this.attrUV);
   }
 };
 

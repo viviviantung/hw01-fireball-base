@@ -1,4 +1,4 @@
-import {vec3, vec4} from 'gl-matrix';
+import {vec2, vec3, vec4} from 'gl-matrix';
 const Stats = require('stats-js');
 import * as DAT from 'dat.gui';
 import Icosphere from './geometry/Icosphere';
@@ -14,7 +14,8 @@ import Cube from './geometry/Cube';
 const controls = {
   Blob: 0.4,
   Warmth: 1.0,
-  Transparency: 1.0, 
+  Transparency: 1.0,
+  Lights: true, 
   'Load Scene': loadScene, // A function pointer, essentially
 };
 
@@ -47,6 +48,7 @@ function main() {
   gui.add(controls, 'Blob', 0, 1).step(0.01);
   gui.add(controls, 'Warmth', 0, 1).step(0.01);
   gui.add(controls, 'Transparency', 0, 1).step(0.01);
+  gui.add(controls, 'Lights').listen().onChange(function() {});
   gui.add(controls, 'Load Scene');
 
   // get canvas and webgl context
@@ -65,7 +67,8 @@ function main() {
   const camera = new Camera(vec3.fromValues(0, 0, 5), vec3.fromValues(0, 0, 0));
 
   const renderer = new OpenGLRenderer(canvas);
-  renderer.setClearColor(0.2, 0.2, 0.2, 1);
+  // renderer.setClearColor(1.0, 0.5, 0.6, 1);
+  renderer.setClearColor(0.0, 0.0, 0.0, 1);
   gl.enable(gl.DEPTH_TEST);
 
   const noise = new ShaderProgram([
@@ -80,6 +83,7 @@ function main() {
     gl.viewport(0, 0, window.innerWidth, window.innerHeight);
     renderer.clear();
     uniftime ++;
+    noise.setDimensions(vec2.fromValues(window.innerWidth * window.devicePixelRatio, window.innerHeight * window.devicePixelRatio));
     
     // noise.setGeometryColor(vec4.fromValues(controls.color[0] / 255, controls.color[1] / 255, controls.color[2] / 255, 1));
     renderer.render(camera, noise, [
@@ -89,7 +93,8 @@ function main() {
     ], uniftime,
     controls.Blob,
     controls.Warmth,
-    controls.Transparency);
+    controls.Transparency,
+    controls.Lights);
     stats.end();
 
     // Tell the browser to call `tick` again whenever it renders a new frame
