@@ -4,6 +4,7 @@ precision highp float;
 
 uniform vec4 u_Color;
 uniform float u_Warmth;
+uniform float u_Alpha;
 
 in vec4 fs_Nor;
 in vec4 fs_LightVec;
@@ -93,5 +94,5 @@ void main()
 {
     vec4 fireColor = (colorize(fs_Noise));
     float pulse = clamp((1.0, 0.2, mod(fs_Time * 0.01, 2.0)), 0.9, 1.5);
-    out_Col = fireColor * pulse;
+    out_Col = vec4(fireColor.xyz * pulse, u_Alpha);
 }

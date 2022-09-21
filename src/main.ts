@@ -13,7 +13,8 @@ import Cube from './geometry/Cube';
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
   Blob: 0.4,
-  Warmth: 1.0, 
+  Warmth: 1.0,
+  Transparency: 1.0, 
   'Load Scene': loadScene, // A function pointer, essentially
 };
 
@@ -45,6 +46,7 @@ function main() {
   const gui = new DAT.GUI();
   gui.add(controls, 'Blob', 0, 1).step(0.01);
   gui.add(controls, 'Warmth', 0, 1).step(0.01);
+  gui.add(controls, 'Transparency', 0, 1).step(0.01);
   gui.add(controls, 'Load Scene');
 
   // get canvas and webgl context
@@ -86,7 +88,8 @@ function main() {
       // cube,
     ], uniftime,
     controls.Blob,
-    controls.Warmth);
+    controls.Warmth,
+    controls.Transparency);
     stats.end();
 
     // Tell the browser to call `tick` again whenever it renders a new frame

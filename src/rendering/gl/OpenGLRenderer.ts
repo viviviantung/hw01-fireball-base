@@ -22,10 +22,12 @@ class OpenGLRenderer {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   }
 
-  render(camera: Camera, prog: ShaderProgram, drawables: Array<Drawable>, time: number, weight: number, warmth: number) {
+  render(camera: Camera, prog: ShaderProgram, drawables: Array<Drawable>, time: number, weight: number, warmth: number, alpha: number) {
     let model = mat4.create();
     let viewProj = mat4.create();
     //let color = vec4.fromValues(1, 0, 0, 1);
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
     mat4.identity(model);
     mat4.multiply(viewProj, camera.projectionMatrix, camera.viewMatrix);
@@ -35,6 +37,7 @@ class OpenGLRenderer {
     prog.setTime(time);
     prog.setNoiseWeight(weight);
     prog.setWarmth(warmth);
+    prog.setAlpha(alpha);
 
     for (let drawable of drawables) {
       prog.draw(drawable);
