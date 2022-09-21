@@ -8,6 +8,7 @@ import Camera from './Camera';
 import {setGL} from './globals';
 import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
 import Cube from './geometry/Cube';
+import Background from './geometry/Background';
 
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
@@ -23,14 +24,17 @@ let icosphere: Icosphere;
 let square: Square;
 let cube: Cube;
 let uniftime: number;
+let background: Background;
 
 function loadScene() {
   icosphere = new Icosphere(vec3.fromValues(0, 0, 0), 1, 4.0);
   icosphere.create();
-  square = new Square(vec3.fromValues(0, 0, 0));
+  square = new Square(vec3.fromValues(0.0, 0.0, 0.0));
   square.create();
   cube = new Cube(vec3.fromValues(0, 0, 0));
   cube.create();
+  background = new Background();
+  background.create();
 }
 
 function main() {
@@ -76,6 +80,11 @@ function main() {
     new Shader(gl.FRAGMENT_SHADER, require('./shaders/noise-frag.glsl')),
   ]);
 
+  const back = new ShaderProgram([
+    new Shader(gl.VERTEX_SHADER, require('./shaders/background-vert.glsl')),
+    new Shader(gl.FRAGMENT_SHADER, require('./shaders/background-frag.glsl')),
+  ]);
+
   // This function will be called every frame
   function tick() {
     camera.update();
@@ -85,11 +94,19 @@ function main() {
     uniftime ++;
     noise.setDimensions(vec2.fromValues(window.innerWidth * window.devicePixelRatio, window.innerHeight * window.devicePixelRatio));
     
-    // noise.setGeometryColor(vec4.fromValues(controls.color[0] / 255, controls.color[1] / 255, controls.color[2] / 255, 1));
     renderer.render(camera, noise, [
-      icosphere,
+      icosphere
       // square,
       // cube,
+    ], uniftime,
+    controls.Blob,
+    controls.Warmth,
+    controls.Transparency,
+    controls.Lights);
+    stats.end();
+
+    renderer.render(camera, back, [
+      background
     ], uniftime,
     controls.Blob,
     controls.Warmth,
