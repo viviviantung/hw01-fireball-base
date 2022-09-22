@@ -51,7 +51,7 @@ function main() {
   const gui = new DAT.GUI();
   gui.add(controls, 'Blob', 0, 1).step(0.01);
   gui.add(controls, 'Warmth', 0, 1).step(0.01);
-  gui.add(controls, 'Transparency', 0, 1).step(0.01);
+  gui.add(controls, 'Transparency', 0.2, 1).step(0.01);
   gui.add(controls, 'Lights').listen().onChange(function() {});
   gui.add(controls, 'Load Scene');
 
