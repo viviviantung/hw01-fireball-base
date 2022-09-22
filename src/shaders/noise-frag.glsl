@@ -99,4 +99,8 @@ void main()
         outputCol = vec4(fireColor * pulse, 1.0);
     }
     out_Col = mix(backColor, outputCol, u_Alpha);
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 826f5f9b5c46393d2e575180c584de382b59db0c
