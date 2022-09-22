@@ -82,16 +82,21 @@ vec4 colorize(float n) {
     return mix(b, Black, c3);
 }
 
+Add Background Shader
+
 void main()
 {
     vec3 fireColor = (colorize(fs_Noise)).xyz;
+    vec4 backColor = colorizeBack();
+    vec4 outputCol;
     float pulse = clamp((1.0, 0.2, mod(fs_Time * 0.01, 2.0)), 0.9, 1.5);
     if (u_Bloom) {
         vec3 bloomColor = bloom(fireColor.xyz);
         fireColor += bloomColor;
         vec3 blend = pow(fireColor, vec3(1.0 / 2.2));
-        out_Col = vec4(blend * pulse, u_Alpha);
+        outputCol = vec4(blend * pulse, 1.0);
     } else {
-        out_Col = vec4(fireColor * pulse, u_Alpha);
+        outputCol = vec4(fireColor * pulse, 1.0);
     }
+    out_Col = mix(backColor, outputCol, u_Alpha);
 }
