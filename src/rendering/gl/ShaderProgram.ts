@@ -123,10 +123,14 @@ float mutate (vec2 uv) {
 
 vec4 colorizeBack() {
 	vec4 blue = vec4(0.1, 0.8, 1.0, 1.0);
-    float blueBubbles = mutate(fs_UV);
-	vec4 water = vec4(vec3(blueBubbles), 1.0) + (blue * 0.6);
+  vec4 red = vec4(1.0, 0.3, 0.1, 1.0);
+  float blueBubbles = mutate(fs_UV);
+  vec4 mixLight = mix(red, blue, u_Warmth);
+	vec4 water = vec4(vec3(blueBubbles), 1.0) + (mixLight * 0.6);
 	vec4 darkBlue = vec4(0.1, 0.3, 1.0, 1.0);
-	return mix(water, darkBlue, 0.7);
+  vec4 darkRed = vec4(0.9, 0.0, 0.0, 1.0);
+  vec4 mixDark = mix(darkRed, darkBlue, u_Warmth);
+	return mix(water, mixDark, 0.7);
 }
 `
 

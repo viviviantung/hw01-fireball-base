@@ -4,6 +4,8 @@
 precision mediump float;
 #endif
 
+uniform float u_Warmth;
+
 in vec2 fs_UV;
 in float fs_Time;
 
@@ -13,8 +15,4 @@ Add Background Shader
 
 void main() {
     out_Col = colorizeBack();
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 826f5f9b5c46393d2e575180c584de382b59db0c

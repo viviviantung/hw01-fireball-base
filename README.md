@@ -26,7 +26,9 @@ For the background, I had the idea of making it an abstract interpretation of wa
 
 ![](fireandwater.png)
 
-UPDATE: I've changed the background water by pertubing simplex noise with worley noise. I also interpolated between the blue bubbly noise with a darker blue background to get what is currently my background. I also tried to fix the alpha issue by bringing out the background shader code into the ShaderProgram so that I can include that code into the fireball fragment shader. Now, the alpha channel interpolates between the fireball color and the background color; however, it still only shows one color for the whole ball.
+UPDATE: I've changed the background water by pertubing simplex noise with worley noise. I also interpolated between the blue bubbly noise with a darker blue background to get what is currently my background. I also tried to fix the alpha issue by bringing out the background shader code into the ShaderProgram so that I can include that code into the fireball fragment shader. Now, the alpha channel interpolates between the fireball color and the background color; however, it still only shows one color for the whole ball. I also changed the "Warmth" dial. Now as the fireball gets cooler, the background gets warmer. I figured the hot and cold contrast should persist even as the color of the ball changes.
+
+![](newwater.png) ![](newwater1.png)
 
 TLDR, this project was a lot of experimenting for me, and although some of the things didn't turn out as aesthetically pleasing as I would've wanted, I enjoyed being able to interpret the project in the way I wanted to and the freedom to try different things.
 
