@@ -2,8 +2,6 @@
 
 https://viviviantung.github.io/hw01-fireball-base/
 
-hello
-
 The first step I took to modify the sphere was implementing simplex noise to alter the shape. I took inspo from this blobby firey ball https://www.clicktorelease.com/blog/vertex-displacement-noise-3d-webgl-glsl-three-js/ and used the simplex noise from Ashima Arts https://github.com/ashima/webgl-noise/blob/master/src/noise3D.glsl. I then found shades of White, Yellow, Red, and Black that I thought looked good and mixed them together using the mix() function.
 
 I then, to add a higher frequency lower amplitude noise on top of the simplex noise and to make it less blobby, I interpolated the simplex noise with fbm noise. The "Blob" feature in the GUI changes the interpolation between the two noises. I ended up doing this as one of the dials on the GUI because I kinda like the blobby look of the fireball and wanted to see the difference between completely simplex and completely fbm.

@@ -9,6 +9,10 @@ import {setGL} from './globals';
 import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
 import Cube from './geometry/Cube';
 import Background from './geometry/Background';
+<<<<<<< HEAD
+=======
+
+>>>>>>> 9e68b8d524354d0adc53239f8789197cb8f0539b
 
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
